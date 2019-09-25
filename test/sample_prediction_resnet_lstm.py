@@ -1,7 +1,9 @@
+import sys,os
+sys.path.append(os.pardir)
 from keras.models import load_model, Model
 from keras.applications import ResNet50
 from lane_change_risk_detection.dataset import DataSet
-import os
+
 
 dir_name = os.path.dirname(__file__)
 dir_name = os.path.dirname(dir_name)
@@ -16,7 +18,5 @@ data.model = backbone_model
 data.extract_features(image_path, option='fixed frame amount', number_of_frames=50)
 
 model = load_model('resnet_lstm.h5')
-print('  safe | dangerous \n', model.predict_proba(data.video_features))
-
-
+print('safe | dangerous \n', model.predict_proba(data.video_features))
 

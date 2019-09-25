@@ -1,8 +1,9 @@
-
+import sys,os
+sys.path.append(os.pardir)
 from keras.models import load_model
 from lane_change_risk_detection.dataset import DataSet
 from Mask_RCNN.mask_rcnn.detect_objects import DetectObjects
-import os
+
 
 dir_name = os.path.dirname(__file__)
 dir_name = os.path.dirname(dir_name)
