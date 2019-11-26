@@ -62,10 +62,10 @@ class DataSet:
                 index += 1
 
         return images
-
+    # use resnet to extract all video features to store in video_features
     def extract_features(self, img_path, feature_size=2048, option='fixed frame amount', number_of_frames=20,
                          max_number_of_frames=500):
-
+        #get all training img folder names
         foldernames = [f for f in os.listdir(img_path) if f.isnumeric() and not f.startswith('.')]
         int_foldernames = [int(f) for f in os.listdir(img_path) if f.isnumeric() and not f.startswith('.')]
 
@@ -77,10 +77,10 @@ class DataSet:
         # todo convert this to a wrapper
         for foldername in tqdm(foldernames):
             if foldername.isnumeric:
-                self.image_seq = self.load_images_for_keras(img_path + "/" + foldername)
+                self.image_seq = self.load_images_for_keras(img_path + "/" + foldername)         # load img from all the dest folder
                 if not len(self.image_seq) == 0:
                     if option == 'fixed frame amount':
-                        self.video_features[int(foldername)-1, :, :] = self._read_video_helper(number_of_frames=number_of_frames)
+                        self.video_features[int(foldername)-1, :, :] = self._read_video_helper(number_of_frames=number_of_frames) #rank all 2048 resnet-features in image list
                     elif option == 'all frames':
                         self.video_features[int(foldername)-1, 0:len(self.image_seq), :] = self.image_seq
 
@@ -128,16 +128,17 @@ class DataSet:
         df = pd.read_csv(file_path, header=None, usecols=[5], names=['risk_score'])
         self.risk_scores = df['risk_score'].tolist()
 
+# 5% of the image scene consider as risk, the rest consider as safe, high risk_score mean high risk level
     def convert_risk_to_one_hot(self, risk_threshold=0.05):
-        indexes = [i[0] for i in sorted(enumerate(self.risk_scores), key=lambda x: x[1])]
-        top_risky_threshold = int(len(indexes) * risk_threshold)
+        indexes = [i[0] for i in sorted(enumerate(self.risk_scores), key=lambda x: x[1])]  #rank all score from little to large, get all score index
+        top_risky_threshold = int(len(indexes) * risk_threshold)   #get 5% scenes as risk scene
         self.risk_one_hot = np.zeros([len(indexes), 2])
 
-        for counter, index in enumerate(indexes[::-1]):
+        for counter, index in enumerate(indexes[::-1]):       # reverse indexes
             if counter < top_risky_threshold:
-                self.risk_one_hot[index, :] = [0, 1]
+                self.risk_one_hot[index, :] = [0, 1]       #for risk lanes
             else:
-                self.risk_one_hot[index, :] = [1, 0]
+                self.risk_one_hot[index, :] = [1, 0]      #for safe lanes
 
     def decode_one_hot(self):
         self.risk_binary = np.zeros([self.risk_one_hot.shape[0], 1])

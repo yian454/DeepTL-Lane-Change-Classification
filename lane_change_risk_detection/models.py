@@ -108,13 +108,20 @@ class Models:
 
         for i in tqdm(range(n)):
 
-            random.shuffle(rand_indexes)
-            # take
-            #int(nb_samples * training_to_all_data_ratio) * 0.05
-            X_train = Data[rand_indexes[0:int(nb_samples * training_to_all_data_ratio)], :]
-            y_train = label[rand_indexes[0:int(nb_samples * training_to_all_data_ratio)], :]
-            X_test = Data[rand_indexes[int(nb_samples * training_to_all_data_ratio):], :]
-            y_test = label[rand_indexes[int(nb_samples * training_to_all_data_ratio):], :]
+            while True:
+                random.shuffle(rand_indexes)
+                # take
+                #int(nb_samples * training_to_all_data_ratio) * 0.05
+                X_train = Data[rand_indexes[0:int(nb_samples * training_to_all_data_ratio)], :]
+                y_train = label[rand_indexes[0:int(nb_samples * training_to_all_data_ratio)], :]
+                X_test = Data[rand_indexes[int(nb_samples * training_to_all_data_ratio):], :]
+                y_test = label[rand_indexes[int(nb_samples * training_to_all_data_ratio):], :]
+#                a,b=np.unique(y_test,return_counts=True)
+                ss=y_test.tolist()   #change darray to list to calculate differ unit number
+                if ss.count([1,0])!=0 and ss.count([0,1])!=0 :   #both risk and safe situations exist
+                    break
+#                if (len(np.unique(y_test))>1):
+#                    break
 
             # Model weights from the previous training session must be resetted to the initial random values
             self.model.set_weights(w_save)
@@ -140,7 +147,7 @@ class Models:
             else:
                 plt.show()
         plt.close()
-
+    # calculate loss
     def get_lastMpercent_loss(self, m=0.1):
 
         index = int(self.nb_epoch*m)
